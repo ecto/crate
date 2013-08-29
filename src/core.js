@@ -46,30 +46,86 @@ Crate.prototype.emit = function (eventName, data) {
  * API calls
  */
 
-Crate.prototype.read = function (path) {
+Crate.prototype.touch = function (rawPath, callback) {
+  var that = this;
+  this.exists(rawPath, function (exists) {
+    if (exists) {
+      return callback(null);
+    }
+
+    var parentPath = Crate.util.path.dirPath(rawPath);
+    that.superblock.resolveInode(parentPath, function (err, inode) {
+      if (err) {
+        return callback(err);
+      }
+
+console.log(inode);
+      // create new inode
+      // create new dentry
+    });
+  });
+};
+
+Crate.prototype.read = function (path, callback) {
 
 };
 
-Crate.prototype.write = function (path, data) {
+Crate.prototype.write = function (rawPath, data, callback) {
+  var that = this;
 
+  this.exists(rawPath, function (exists) {
+    if (exists) {
+      write();
+    } else {
+      console.log('path does not exist');
+      // create
+      //write();
+    }
+  });
+
+  function write () {
+    this.superblock.resolveInode(rawPath, function (err, inode) {
+      if (err) {
+        return callback(err);
+      }
+
+console.log('getting file from inode');
+      inode.getFile(function () {
+
+      });
+    });
+  }
 };
 
-Crate.prototype.exists = function () {
+Crate.prototype.exists = function (rawPath, callback) {
+  this.superblock.resolveInode(rawPath, function (err, inode) {
+    if (!err && inode) {
+      callback(true);
+    } else {
+      callback(false);
+    }
+  });
+};
+
+Crate.prototype.mkdir = function () {
 
 };
 
 Crate.prototype.ls = function (rawPath, callback) {
-  this.superblock.resolveInode(rawPath, function () {
-console.log(arguments);
-    callback(null, []); // Object.keys(inode.dentries)
+  this.superblock.resolveInode(rawPath, function (err, inode) {
+    // should we keep . and .. in dentries or fake them?
+    // in dentries would be easier to resolve
+    var filenames = ['.','..'];
+
+    for (var i in inode.dentries) {
+      filenames.push(inode.dentries[i].name);
+    }
+
+    callback(null, filenames);
   });
 };
 
 Crate.prototype.rm = function (path) {
-
-};
-
-Crate.prototype.touch = function (path) {
 
 };
 

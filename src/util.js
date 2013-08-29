@@ -16,6 +16,18 @@ Crate.util.path.parse = function (rawPath) {
   return path;
 };
 
+Crate.util.path.dirPath = function (rawPath) {
+  var path = Crate.util.path.parse(rawPath);
+  path.pop();
+  var full = path.join('/');
+
+  if (full == '') {
+    full = '/';
+  }
+
+  return full;
+};
+
 Crate.util.path.isAbsolute = function (path) {
   if (path.charAt(0) == '/') {
     return true;

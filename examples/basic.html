@@ -5,11 +5,16 @@
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
 <script type="text/javascript" src="../dist/crate.js"></script>
 <script>
-var data = '{foo:"bar"}';
-
 var fs = new Crate();
-fs.load(data, function () {
 
+fs.touch('/foo', function () {
+  console.log(arguments);
+});
+
+//var data = '{foo:"bar"}';
+//fs.load(data);
+
+/*
 fs.ls('/', function (err, filenames) {
   if (err) {
     document.write(err);
@@ -18,9 +23,7 @@ fs.ls('/', function (err, filenames) {
 
   document.write(filenames.join('<br />'));
 });
-});
-
-
+*/
 </script>
 </head>
 <body>

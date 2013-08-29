@@ -11,7 +11,8 @@ var Memory = Crate.drivers.memory = function () {
   };
 };
 
-Memory.prototype.load = function () {
+Memory.prototype.load = function (data, callback) {
+  callback && callback();
 };
 
 Memory.prototype.createInode = function (id, callback) {

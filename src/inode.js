@@ -5,6 +5,7 @@
 
 var Inode = Crate.Inode = function (superblock) {
   this.superblock = superblock;
+  this.dentries = [];
 
   // id
   // uid
@@ -15,15 +16,20 @@ var Inode = Crate.Inode = function (superblock) {
   // ctime
   // mode?
   // parent (dentry?)
-  // inodes
+  // inodes?
   // dentries
 };
 
 Inode.prototype.lookup = function (name, callback) {
   for (var i in this.dentries) {
-    console.log(i);
-    callback('failed');
+    if (this.dentries[i].name == name) {
+      this.superblock.loadInode(this.dentries[i].childId, function (err, inode) {
+        return callback(err, inode);
+      });
+    }
   };
+
+  callback('Could not find child');
 };
 
 Inode.prototype.load = function (data) {

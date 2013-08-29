@@ -48,7 +48,7 @@ Superblock.prototype.resolveInode = function (rawPath, callback) {
   }
 };
 
-Superblock.prototype.createInode = function (id, callback) {
+Superblock.prototype.createInode = function (id, /*parentId,*/ callback) {
   var that = this;
 
   this.system.driver.createInode(id, function (err) {
@@ -59,6 +59,23 @@ Superblock.prototype.createInode = function (id, callback) {
 
     var inode = new Crate.Inode(that);
     inode.id = id;
+
+/*
+    // TODO save inode with dentries
+    // or dirty the inode?
+
+    var currentDentry = new Crate.Dentry();
+    currentDentry.parentInode = id;
+    currentDentry.childInode = id;
+    currentDentry.name = '.';
+    inode.dentries.push(currentDentry);
+
+    var parentDentry = new Crate.Dentry();
+    parentDentry.parentInode = id;
+    parentDentry.childInode = parentId;
+    parentDentry.name = '..';
+    inode.dentries.push(parentDentry);
+*/
 
     that.cacheInode(inode);
     callback(null, inode);
