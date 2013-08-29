@@ -4,11 +4,28 @@
 'use strict';
 
 var Memory = Crate.drivers.memory = function () {
-  alert('hi from driver!');
+  this.data = {
+    inodes: {},
+    dentries: {},
+    files: {}
+  };
 };
 
 Memory.prototype.load = function () {
-  this.data = {};
+};
+
+Memory.prototype.createInode = function (id, callback) {
+  if (this.data.inodes[id]) {
+    callback('Inode already exists');
+  }
+
+  var inode = {};
+  this.data.inodes[id] = inode;
+  callback(null, inode);
+};
+
+Memory.prototype.loadInode = function (id, callback) {
+  callback(null, {});
 };
 
 Memory.prototype.save = function () {

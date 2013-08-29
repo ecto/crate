@@ -4,11 +4,9 @@
 'use strict';
 
 var Dentry = Crate.Dentry = function () {
-  // associated inode
-  // parent dentry
+  // parents
+  // child
   // name
-  // children dentries
-  // subdirs
   // revalidation time
 };
 

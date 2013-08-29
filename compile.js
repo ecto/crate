@@ -45,7 +45,7 @@ compile() {
     src/inode.js \
     src/dentry.js \
     src/file.js \
-    src/driver.js \
+    src/util.js \
     src/drivers/*.js \
     > dist/crate.js
   uglifyjs dist/crate.js > dist/crate.min.js

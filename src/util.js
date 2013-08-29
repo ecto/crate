@@ -1,9 +1,19 @@
 
+(function () {
+
+'use strict';
+
 Crate.util = {};
 Crate.util.path = {};
 
 Crate.util.path.parse = function (rawPath) {
-  var path = path.split('/');
+  // strip ending slash
+  if (rawPath.charAt(rawPath.length - 1) == '/') {
+    rawPath = rawPath.substring(0, rawPath.length - 1);
+  }
+
+  var path = rawPath.split('/');
+  return path;
 };
 
 Crate.util.path.isAbsolute = function (path) {
@@ -23,3 +33,5 @@ Crate.util.path.isRoot = function (path) {
 
   return false;
 };
+
+})();

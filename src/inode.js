@@ -3,7 +3,9 @@
 
 'use strict';
 
-var Inode = Crate.Inode = function () {
+var Inode = Crate.Inode = function (superblock) {
+  this.superblock = superblock;
+
   // id
   // uid
   // version
@@ -17,8 +19,16 @@ var Inode = Crate.Inode = function () {
   // dentries
 };
 
-Inode.prototype.lookup = function () {
+Inode.prototype.lookup = function (name, callback) {
+  for (var i in this.dentries) {
+    console.log(i);
+    callback('failed');
+  };
+};
 
+Inode.prototype.load = function (data) {
+  // attach data to inode
+  console.log('inode load', data);
 };
 
 Inode.prototype.link = function () {
