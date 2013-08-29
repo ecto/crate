@@ -3,8 +3,10 @@
 
 'use strict';
 
-var Superblock = Crate.Superblock = function () {
-  this.inodes = [];
+var Superblock = Crate.Superblock = function (callback) {
+  this.inodes = {};
+
+  this.sync(callback);
 };
 
 Superblock.prototype.createInode = function () {
@@ -31,8 +33,8 @@ Superblock.prototype.write = function () {
 
 };
 
-Superblock.prototype.sync = function () {
-
+Superblock.prototype.sync = function (callback) {
+  callback && callback(null);
 };
 
 })();
