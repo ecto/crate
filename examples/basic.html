@@ -8,22 +8,15 @@
 var fs = new Crate();
 
 fs.touch('/foo', function () {
-  console.log(arguments);
+  fs.ls('/', function (err, filenames) {
+    if (err) {
+      document.write(err);
+      return;
+    }
+
+    document.write(filenames.join('<br />'));
+  });
 });
-
-//var data = '{foo:"bar"}';
-//fs.load(data);
-
-/*
-fs.ls('/', function (err, filenames) {
-  if (err) {
-    document.write(err);
-    return;
-  }
-
-  document.write(filenames.join('<br />'));
-});
-*/
 </script>
 </head>
 <body>

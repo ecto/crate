@@ -28,6 +28,17 @@ Crate.util.path.dirPath = function (rawPath) {
   return full;
 };
 
+Crate.util.path.filename = function (rawPath) {
+  // make sure it isn't a directory
+  if (rawPath.charAt(rawPath.length - 1) == '/') {
+    return false;
+  }
+
+  var filename = rawPath.split('/').pop();
+
+  return filename;
+};
+
 Crate.util.path.isAbsolute = function (path) {
   if (path.charAt(0) == '/') {
     return true;

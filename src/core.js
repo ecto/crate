@@ -46,22 +46,39 @@ Crate.prototype.emit = function (eventName, data) {
  * API calls
  */
 
+/*
+creating a child inode
+find the parent
+create new inode
+create link
+save both
+*/
 Crate.prototype.touch = function (rawPath, callback) {
   var that = this;
+
   this.exists(rawPath, function (exists) {
     if (exists) {
       return callback(null);
     }
 
+    var filename = Crate.util.path.filename(rawPath);
     var parentPath = Crate.util.path.dirPath(rawPath);
+
     that.superblock.resolveInode(parentPath, function (err, inode) {
       if (err) {
         return callback(err);
       }
 
-console.log(inode);
       // create new inode
-      // create new dentry
+      that.superblock.createInode(function (err, newInode) {
+        // link parent to child
+        inode.link({
+          name: filename,
+          child: newInode
+        }, function (err) {
+          callback(err);
+        });
+      });
     });
   });
 };
