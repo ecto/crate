@@ -142,7 +142,27 @@ Crate.prototype.ls = function (rawPath, callback) {
   });
 };
 
-Crate.prototype.rm = function (path) {
+Crate.prototype.rm = function (rawPath, callback) {
+  var that = this;
 
+  this.exists(rawPath, function (exists) {
+    if (!exists) {
+      return callback(null);
+    }
+
+    var filename = Crate.util.path.filename(rawPath);
+    var parentPath = Crate.util.path.dirPath(rawPath);
+
+    that.superblock.resolveInode(parentPath, function (err, inode) {
+      if (err) {
+        return callback(err);
+      }
+
+      // unlink child from parent
+      inode.unlink(filename, function (err) {
+        callback(err);
+      });
+    });
+  });
 };
 

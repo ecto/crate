@@ -7,19 +7,39 @@
 <script>
 var fs = new Crate();
 
-fs.touch('/foo', function () {
+$(document).ready(function () {
+  displayFiles();
+});
+
+function displayFiles () {
   fs.ls('/', function (err, filenames) {
     if (err) {
       document.write(err);
       return;
     }
 
-    document.write(filenames.join('<br />'));
+    document.getElementById('files').innerHTML = filenames.join('<br />');
   });
-});
+}
+
+function createFile () {
+  fs.touch('/foo', function () {
+    console.log(arguments);
+    displayFiles();
+  });
+}
+
+function deleteFile () {
+  fs.rm('/foo', function () {
+    console.log(arguments);
+    displayFiles();
+  });
+}
 </script>
 </head>
 <body>
-  
+  <button onclick="createFile()">create file</button>
+  <button onclick="deleteFile()">delete file</button>
+  <div id="files"></div>
 </body>
 </html>

@@ -98,6 +98,8 @@ Inode.prototype.unlink = function (name, callback) {
     return callback('Must supply name');
   }
 
+  var that = this;
+
   // check for existing dentry
   this.lookup(name, function (err, inode, i) {
     if (!inode) {
@@ -114,7 +116,7 @@ Inode.prototype.unlink = function (name, callback) {
 
     // mark both as dirty
     that.dirty = true;
-    child.dirty = true; // :(
+    inode.dirty = true;
 
     callback(null);
   });
