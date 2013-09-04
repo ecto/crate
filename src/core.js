@@ -46,13 +46,6 @@ Crate.prototype.emit = function (eventName, data) {
  * API calls
  */
 
-/*
-creating a child inode
-find the parent
-create new inode
-create link
-save both
-*/
 Crate.prototype.touch = function (rawPath, callback) {
   var that = this;
 
@@ -76,7 +69,7 @@ Crate.prototype.touch = function (rawPath, callback) {
           name: filename,
           child: newInode
         }, function (err) {
-          callback(err);
+          callback(err, newInode);
         });
       });
     });
@@ -124,8 +117,17 @@ Crate.prototype.exists = function (rawPath, callback) {
   });
 };
 
-Crate.prototype.mkdir = function () {
+Crate.prototype.mkdir = function (rawPath, callback) {
+  this.touch(rawPath, function (err, inode) {
+    if (err) {
+      return callback(err);
+    }
 
+    inode.isDirectory = true;
+    inode.dirty = true;
+
+    callback(err, inode);
+  });
 };
 
 Crate.prototype.ls = function (rawPath, callback) {
@@ -170,7 +172,6 @@ Crate.prototype.rm = function (rawPath, callback) {
 };
 
 Crate.prototype.stat = function (rawPath, callback) {
-console.log('rawPath');
   this.superblock.resolveInode(rawPath, function (err, inode) {
     if (err) {
       return callback(err);
