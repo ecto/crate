@@ -8,6 +8,7 @@ var Inode = Crate.Inode = function (superblock) {
   this.dentries = [];
   this.links = 0;
   this.dirty = true; // ?
+  this.isDirectory = false;
 
   // id
   // uid

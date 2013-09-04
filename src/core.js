@@ -134,6 +134,9 @@ Crate.prototype.ls = function (rawPath, callback) {
     // in dentries would be easier to resolve
     var filenames = ['.','..'];
 
+    // we should loop through inodes and provide an array
+    // containing objects with
+    // { name, isDirectory, mime? }
     for (var i in inode.dentries) {
       filenames.push(inode.dentries[i].name);
     }
@@ -165,4 +168,28 @@ Crate.prototype.rm = function (rawPath, callback) {
     });
   });
 };
+
+Crate.prototype.stat = function (rawPath, callback) {
+console.log('rawPath');
+  this.superblock.resolveInode(rawPath, function (err, inode) {
+    if (err) {
+      return callback(err);
+    }
+
+    var info = {
+      id: inode.id,
+      uid: null,
+      version: 0,
+      isDirectory: inode.isDirectory
+      // size
+      // atime
+      // mtime
+      // ctime
+      // mode
+    };
+
+    callback(null, info);
+  });
+};
+
 
