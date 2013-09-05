@@ -5,7 +5,6 @@
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
 <script type="text/javascript" src="../dist/crate.js"></script>
 <script>
-var cwd = '/';
 var fs = new Crate();
 
 $(document).ready(function () {
@@ -14,10 +13,11 @@ $(document).ready(function () {
   $('#files .file').live('click', function (e) {
     var name = $(this).text();
 
-    fs.stat(cwd + name, function (err, info) {
+    fs.stat(fs.cwd + name, function (err, info) {
       if (info.isDirectory) {
-        cwd += name;
-        displayFiles();
+        fs.cd(name, function () {
+          displayFiles();
+        });
       } else {
         // is file
       }
@@ -26,7 +26,7 @@ $(document).ready(function () {
 });
 
 function displayFiles () {
-  fs.ls(cwd, function (err, items) {
+  fs.ls(fs.cwd, function (err, items) {
     if (err) {
       document.write(err);
       return;
@@ -39,13 +39,13 @@ function displayFiles () {
       $files.append($row);
     }
 
-    $('#cwd').text(cwd);
+    $('#cwd').text(fs.cwd);
   });
 }
 
 function createFile () {
   var name = prompt('Filename?');
-  fs.touch(cwd + name, function () {
+  fs.touch(fs.cwd + name, function () {
     console.log(arguments);
     displayFiles();
   });
@@ -53,7 +53,7 @@ function createFile () {
 
 function createDirectory () {
   var name = prompt('Directory name?');
-  fs.mkdir(cwd + name, function () {
+  fs.mkdir(fs.cwd + name, function () {
     console.log(arguments);
     displayFiles();
   });
@@ -61,7 +61,7 @@ function createDirectory () {
 
 function deleteFile () {
   var name = prompt('Filename?');
-  fs.rm(cwd + name, function () {
+  fs.rm(fs.cwd + name, function () {
     console.log(arguments);
     displayFiles();
   });

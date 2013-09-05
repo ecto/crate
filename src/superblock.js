@@ -21,13 +21,16 @@ var Superblock = Crate.Superblock = function (options, callback) {
 // create a root inode
 Superblock.prototype.bootstrap = function (callback) {
   this.createInode(function (err, inode) {
-    // create a parent link to itself
-    inode.link({
+    inode.isDirectory = true;
+    inode.dirty = true;
+
+    // manually create a parent link to itself
+    inode.dentries.push({
       name: '..',
-      childInode: inode
-    }, function () {
-      callback();
+      id: inode.id
     });
+
+    callback();
   });
 };
 
@@ -71,8 +74,10 @@ Superblock.prototype.createInode = function (callback) {
       return;
     }
 
-    var inode = new Crate.Inode(that);
-    inode.id = tempNode.id;
+    var inode = new Crate.Inode({
+      id: tempNode.id,
+      superblock: that
+    });
     that.cacheInode(inode);
     callback(null, inode);
   });
@@ -93,7 +98,10 @@ Superblock.prototype.loadInode = function (id, callback) {
       return;
     }
 
-    var inode = new Crate.Inode(that);
+    var inode = new Crate.Inode({
+      id: data.id,
+      superblock: that
+    });
     inode.load(data);
 
     that.cacheInode(inode);

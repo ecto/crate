@@ -8,6 +8,7 @@ var Crate = function Crate (options) {
   this.driver = new Crate.drivers[driver];
 
   this.listeners = {};
+  this.cwd = '/';
 
   this.superblock = new Crate.Superblock({
     system: this
@@ -138,9 +139,7 @@ Crate.prototype.mkdir = function (rawPath, callback) {
 
 Crate.prototype.ls = function (rawPath, callback) {
   this.superblock.resolveInode(rawPath, function (err, inode) {
-    // should we keep . and .. in dentries or fake them?
-    // in dentries would be easier to resolve
-    var filenames = ['.','..'];
+    var filenames = [];
 
     // we should loop through inodes and provide an array
     // containing objects with
@@ -199,4 +198,8 @@ Crate.prototype.stat = function (rawPath, callback) {
   });
 };
 
-
+Crate.prototype.cd = function (rawPath, callback) {
+  // resolve realPath relative to cwd
+  // resolve inode with resolved path
+  // set cwd to realPath if successful
+};

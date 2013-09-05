@@ -57,4 +57,36 @@ Crate.util.path.isRoot = function (path) {
   return false;
 };
 
+Crate.util.path.resolve = function () {
+  var parts = [];
+
+  for (var i in arguments) {
+    // TODO check for string
+    var path = Crate.util.path.parse(arguments[i]);
+console.log(path);
+    parts = parts.concat(path);
+  }
+
+console.log(parts);
+  var realPath = [];
+
+  for (var i in parts) {
+    if (parts[i] == '.') {
+      // do nothing?
+    } else if (parts[i] == '..') {
+      // remove last addition
+      // only if we are above root
+      if (realPath.length > 1) {
+        realPath.pop();
+      }
+    } else {
+      // add to array
+      realPath.push(parts[i]);
+    }
+  }
+
+console.log(realPath);
+  return realPath.join('/');
+};
+
 })();

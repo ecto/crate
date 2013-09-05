@@ -3,8 +3,11 @@
 
 'use strict';
 
-var Inode = Crate.Inode = function (superblock) {
-  this.superblock = superblock;
+var Inode = Crate.Inode = function (options) {
+  options = options || {};
+
+  this.id = options.id;
+  this.superblock = options.superblock;
   this.dentries = [];
   this.links = 0;
   this.dirty = true; // ?
@@ -22,15 +25,11 @@ var Inode = Crate.Inode = function (superblock) {
   // inodes?
   // dentries
 
-/*
   // create a self link
-  this.link({
+  this.dentries.push({
     name: '.',
-    childInode: {} // blank because we don't have an id yet
-  }, function () {
-    console.log('added .');
+    id: this.id
   });
-*/
 };
 
 Inode.prototype.serialize = function () {
@@ -84,7 +83,13 @@ Inode.prototype.link = function (options, callback) {
     // child links++
     child.links++;
     
-    // set this as parent (..) ?
+    // set this as parent (..)
+    var childDentry = {
+      id: that.id,
+      name: '..'
+    };
+console.log(childDentry);
+    child.dentries.push(childDentry);
 
     // mark both as dirty
     that.dirty = true;
