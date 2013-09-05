@@ -51,7 +51,7 @@ Crate.prototype.touch = function (rawPath, callback) {
 
   this.exists(rawPath, function (exists) {
     if (exists) {
-      return callback(null);
+      return callback('Path exists');
     }
 
     var filename = Crate.util.path.filename(rawPath);
@@ -118,15 +118,21 @@ Crate.prototype.exists = function (rawPath, callback) {
 };
 
 Crate.prototype.mkdir = function (rawPath, callback) {
-  this.touch(rawPath, function (err, inode) {
+  // get parent inode
+  // tell it to mkdir
+  // callback with new inode
+  var that = this;
+  var dirname = Crate.util.path.filename(rawPath);
+  var parentPath = Crate.util.path.dirPath(rawPath);
+
+  that.superblock.resolveInode(parentPath, function (err, inode) {
     if (err) {
       return callback(err);
     }
 
-    inode.isDirectory = true;
-    inode.dirty = true;
-
-    callback(err, inode);
+    inode.mkdir(dirname, function (err, newInode) {
+      callback(err, newInode);
+    });
   });
 };
 

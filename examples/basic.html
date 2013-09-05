@@ -14,9 +14,13 @@ $(document).ready(function () {
   $('#files .file').live('click', function (e) {
     var name = $(this).text();
 
-console.log('hi');
-    fs.stat(cwd + name, function () {
-      console.log(arguments);
+    fs.stat(cwd + name, function (err, info) {
+      if (info.isDirectory) {
+        cwd += name;
+        displayFiles();
+      } else {
+        // is file
+      }
     });
   }); 
 });

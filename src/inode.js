@@ -44,7 +44,7 @@ Inode.prototype.deserialize = function () {
 Inode.prototype.lookup = function (name, callback) {
   for (var i in this.dentries) {
     if (this.dentries[i].name == name) {
-      return this.superblock.loadInode(this.dentries[i].childId, function (err, inode) {
+      return this.superblock.loadInode(this.dentries[i].id, function (err, inode) {
         callback(err, inode, i);
       });
     }
@@ -123,8 +123,24 @@ Inode.prototype.unlink = function (name, callback) {
   });
 };
 
-Inode.prototype.mkdir = function () {
+Inode.prototype.mkdir = function (dirname, callback) {
+  var that = this;
 
+  that.superblock.createInode(function (err, inode) {
+    if (err) {
+      return callback(err);
+    }
+
+    that.link({
+      name: dirname,
+      child: inode
+    }, function (err) {
+      inode.isDirectory = true;
+      inode.dirty = true;
+
+      callback(err, inode);
+    });
+  });
 };
 
 Inode.prototype.rmdir = function () {

@@ -87,6 +87,7 @@ Superblock.prototype.loadInode = function (id, callback) {
   var that = this;
 
   this.system.driver.loadInode(id, function (err, data) {
+    // TODO should we be creating inodes here or erring?
     if (err || !inode) {
       that.createInode(callback);
       return;
