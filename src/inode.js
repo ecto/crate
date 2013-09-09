@@ -88,7 +88,6 @@ Inode.prototype.link = function (options, callback) {
       id: that.id,
       name: '..'
     };
-console.log(childDentry);
     child.dentries.push(childDentry);
 
     // mark both as dirty
