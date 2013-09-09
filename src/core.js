@@ -21,12 +21,12 @@ Crate.prototype.load = function (data, callback) {
   this.driver.load(data, callback);
 };
 
-Crate.prototype.save = function () {
-  this.driver.save(data);
+Crate.prototype.save = function (data, callback) {
+  this.driver.save(data, callback);
 };
 
 Crate.prototype.sync = function () {
-  this.driver.sync(data);
+  this.superblock.sync(data);
 };
 
 Crate.prototype.on = function (eventName, listener) {
