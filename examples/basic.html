@@ -13,12 +13,14 @@ $(document).ready(function () {
   $('#files .file').live('click', function (e) {
     var name = $(this).text();
 
-    fs.stat(fs.cwd + name, function (err, info) {
+    var realPath = Crate.util.path.resolve(fs.cwd, name);
+    fs.stat(realPath, function (err, info) {
       if (info.isDirectory) {
         fs.cd(name, function () {
           displayFiles();
         });
       } else {
+        console.log(info);
         // is file
       }
     });
@@ -45,7 +47,8 @@ function displayFiles () {
 
 function createFile () {
   var name = prompt('Filename?');
-  fs.touch(fs.cwd + name, function () {
+  var realPath = Crate.util.path.resolve(fs.cwd, name);
+  fs.touch(realPath, function () {
     console.log(arguments);
     displayFiles();
   });
@@ -53,7 +56,8 @@ function createFile () {
 
 function createDirectory () {
   var name = prompt('Directory name?');
-  fs.mkdir(fs.cwd + name, function () {
+  var realPath = Crate.util.path.resolve(fs.cwd, name);
+  fs.mkdir(realPath, function () {
     console.log(arguments);
     displayFiles();
   });
@@ -61,7 +65,8 @@ function createDirectory () {
 
 function deleteFile () {
   var name = prompt('Filename?');
-  fs.rm(fs.cwd + name, function () {
+  var realPath = Crate.util.path.resolve(fs.cwd, name);
+  fs.rm(realPath, function () {
     console.log(arguments);
     displayFiles();
   });

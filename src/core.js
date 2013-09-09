@@ -199,7 +199,15 @@ Crate.prototype.stat = function (rawPath, callback) {
 };
 
 Crate.prototype.cd = function (rawPath, callback) {
-  // resolve realPath relative to cwd
-  // resolve inode with resolved path
-  // set cwd to realPath if successful
+  var that = this;
+  var realPath = Crate.util.path.resolve(this.cwd, rawPath);
+
+  that.superblock.resolveInode(realPath, function (err, inode) {
+    if (err) {
+      return callback(err);
+    }
+
+    that.cwd = realPath;
+    callback(null, inode);
+  });
 };

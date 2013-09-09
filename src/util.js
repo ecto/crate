@@ -63,11 +63,9 @@ Crate.util.path.resolve = function () {
   for (var i in arguments) {
     // TODO check for string
     var path = Crate.util.path.parse(arguments[i]);
-console.log(path);
     parts = parts.concat(path);
   }
 
-console.log(parts);
   var realPath = [];
 
   for (var i in parts) {
@@ -85,8 +83,14 @@ console.log(parts);
     }
   }
 
-console.log(realPath);
-  return realPath.join('/');
+  var maybePath = realPath.join('/');
+
+  // the join won't deal with root
+  if (maybePath == '') {
+    maybePath = '/';
+  }
+
+  return maybePath;
 };
 
 })();
