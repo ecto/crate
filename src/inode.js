@@ -13,6 +13,10 @@ var Inode = Crate.Inode = function (options) {
   this.dirty = true; // ?
   this.isDirectory = false;
 
+  this.ctime = +new Date();
+  this.mtime = +new Date();
+  this.atime = 0; // never accessed? what is POSIX default?
+
   // id
   // uid
   // version
@@ -26,14 +30,33 @@ var Inode = Crate.Inode = function (options) {
   // dentries
 
   // create a self link
-  this.dentries.push({
+  var dentry = new Crate.Dentry({
     name: '.',
     id: this.id
   });
+  this.dentries.push(dentry);
 };
 
 Inode.prototype.serialize = function () {
+  var dentries = [];
+  for (var i in this.dentries) {
+    dentries.push(this.dentries[i].serialize());
+  }
 
+  var data = {
+    id: this.id,
+    uid: this.uid,
+    dentries: dentries,
+    links: this.links,
+    atime: this.atime,
+    mtime: this.mtime,
+    ctime: this.ctime,
+    mode: this.mode,
+    version: this.version,
+    size: this.size,
+  };
+
+  return data;
 };
 
 Inode.prototype.deserialize = function () {
@@ -74,20 +97,20 @@ Inode.prototype.link = function (options, callback) {
     }
 
     // create dentry
-    var dentry = {
+    var dentry = new Crate.Dentry({
       id: child.id,
       name: name
-    };
+    });
     that.dentries.push(dentry);
 
     // child links++
     child.links++;
     
     // set this as parent (..)
-    var childDentry = {
+    var childDentry = new Crate.Dentry({
       id: that.id,
       name: '..'
-    };
+    });
     child.dentries.push(childDentry);
 
     // mark both as dirty

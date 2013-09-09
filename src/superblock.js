@@ -7,28 +7,36 @@ var Superblock = Crate.Superblock = function (options, callback) {
   this.inodes = {};
   this.rootNode = options.rootNode || 1;
   this.system = options.system;
+  this.syncInterval = 1000;
 
   if (!this.system) {
     // throw or callback with err?
   }
 
+  var that = this;
   this.bootstrap(function (err) {
     callback && callback();
-    // this.loadInode(this.rootNode, function (err, inode) { });
+
+    setInterval(function () {
+      that.sync();
+    }, that.syncInterval);
   });
 };
 
 // create a root inode
 Superblock.prototype.bootstrap = function (callback) {
-  this.createInode(function (err, inode) {
+  var that = this;
+
+  that.createInode(function (err, inode) {
     inode.isDirectory = true;
-    inode.dirty = true;
+    that.dirtyInode(inode);
 
     // manually create a parent link to itself
-    inode.dentries.push({
+    var dentry = new Crate.Dentry({
       name: '..',
       id: inode.id
     });
+    inode.dentries.push(dentry);
 
     callback();
   });
@@ -91,7 +99,7 @@ Superblock.prototype.loadInode = function (id, callback) {
 
   var that = this;
 
-  this.system.driver.loadInode(id, function (err, data) {
+  this.system.driver.readInode(id, function (err, data) {
     // TODO should we be creating inodes here or erring?
     if (err || !inode) {
       that.createInode(callback);
@@ -116,10 +124,20 @@ Superblock.prototype.cacheInode = function (inode) {
 Superblock.prototype.destroyInode = function () {
 };
 
-Superblock.prototype.dirtyInode = function () {
+Superblock.prototype.dirtyInode = function (inode) {
+  inode.mtime = +new Date();
+  inode.dirty = true;
 };
 
-Superblock.prototype.writeInode = function () {
+Superblock.prototype.updateInode = function (id, callback) {
+  var that = this;
+  var inode = this.inodes[id];
+  var data = inode.serialize();
+
+  that.system.driver.updateInode(data, function (err) {
+    that.inodes[id].dirty = false;
+    callback(err);
+  });
 };
 
 Superblock.prototype.deleteInode = function () {
@@ -128,7 +146,14 @@ Superblock.prototype.deleteInode = function () {
 Superblock.prototype.write = function () {
 };
 
+// TODO what if save takes longer than syncInterval?
 Superblock.prototype.sync = function (callback) {
+  for (var i in this.inodes) {
+    if (this.inodes[i].dirty) {
+      this.updateInode(this.inodes[i].id, function (err) {
+      });
+    }
+  }
 };
 
 })();

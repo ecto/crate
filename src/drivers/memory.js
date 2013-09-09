@@ -6,7 +6,6 @@
 var Memory = Crate.drivers.memory = function () {
   this.data = {
     inodes: {},
-    dentries: {},
     files: {}
   };
 
@@ -32,12 +31,24 @@ Memory.prototype.createInode = function (callback) {
   callback(null, inode);
 };
 
-Memory.prototype.loadInode = function (id, callback) {
-  callback(null, {});
+Memory.prototype.readInode = function (id, callback) {
+  var data = this.data.inodes[id];
+
+  if (!data) {
+    return callback('Inode not found');
+  }
+
+  callback(null, data);
 };
 
-Memory.prototype.saveInode = function () {
-  console.log(this.data);
+Memory.prototype.updateInode = function (data, callback) {
+  var id = data.id;
+  this.data.inodes[id] = data;
+  callback(null);
+};
+
+Memory.prototype.destroyInode = function (id, callback) {
+  delete this.data.inodes[id];
 };
 
 })();
