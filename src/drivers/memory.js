@@ -70,11 +70,10 @@ Memory.prototype.createFile = function (callback) {
     callback('File already exists');
   }
 
-  var file = {};
-  file.id = id;
-  this.data.files[id] = file;
+  var fileData = new String();
+  this.data.files[id] = fileData;
 
-  callback(null, file);
+  callback(null, id);
 };
 
 Memory.prototype.readFile = function (id, callback) {
@@ -87,8 +86,7 @@ Memory.prototype.readFile = function (id, callback) {
   callback(null, data);
 };
 
-Memory.prototype.updateFile = function (data, callback) {
-  var id = data.id;
+Memory.prototype.updateFile = function (id, data, callback) {
   this.data.files[id] = data;
   callback(null);
 };

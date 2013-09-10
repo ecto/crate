@@ -20,8 +20,7 @@ $(document).ready(function () {
           displayFiles();
         });
       } else {
-        console.log(info);
-        // is file
+        openFile(realPath);
       }
     });
   }); 
@@ -30,8 +29,7 @@ $(document).ready(function () {
 function displayFiles () {
   fs.ls(fs.cwd, function (err, items) {
     if (err) {
-      document.write(err);
-      return;
+      return alert(err);
     }
 
     var $files = $('#files');
@@ -49,7 +47,6 @@ function createFile () {
   var name = prompt('Filename?');
   var realPath = Crate.util.path.resolve(fs.cwd, name);
   fs.touch(realPath, function () {
-    console.log(arguments);
     displayFiles();
   });
 }
@@ -58,7 +55,6 @@ function createDirectory () {
   var name = prompt('Directory name?');
   var realPath = Crate.util.path.resolve(fs.cwd, name);
   fs.mkdir(realPath, function () {
-    console.log(arguments);
     displayFiles();
   });
 }
@@ -69,6 +65,34 @@ function deleteFile () {
   fs.rm(realPath, function () {
     console.log(arguments);
     displayFiles();
+  });
+}
+
+function openFile (path) {
+  fs.open(path, function (err, file) {
+    window.file = file;
+    file.read(function (err, data) {
+      if (err) {
+        return alert(err);
+      }
+
+      renderFile();
+    });
+  });
+}
+
+function renderFile () {
+  var data = file.data.toString();
+  $('#data').val(data).focus();
+  $('#file').addClass('active');
+}
+
+function save () {
+  var data = $('#data').val();
+  file.write(data, function (err) {
+    if (err) {
+      alert(err);
+    }
   });
 }
 </script>
@@ -96,6 +120,34 @@ body {
   background: #f5f5f5;
   cursor: pointer;
 }
+
+#file {
+  background: #fff;
+  border-left: 5px solid #eee;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 0;
+  transition: width 0.1s ease;
+}
+
+#file.active {
+  width: 50%;
+}
+
+#file #data {
+  outline: 0;
+  margin: 0;
+  padding: 15px;
+  border: 0;
+  border-top: 5px solid #eee;
+  position: absolute;
+  top: 50px;
+  bottom: 0;
+  right: 0;
+  left: 0;
+}
 </style>
 </head>
 <body>
@@ -106,5 +158,9 @@ body {
   <button onclick="deleteDirectory()">delete directory</button>
   <div id="cwd"></div>
   <div id="files"></div>
+  <div id="file">
+    <button onclick="save()">save</button>
+    <textarea id="data"></textarea>
+  </div>
 </body>
 </html>

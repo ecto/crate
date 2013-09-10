@@ -70,15 +70,34 @@ Crate.prototype.touch = function (rawPath, callback) {
           name: filename,
           child: newInode
         }, function (err) {
-          callback(err, newInode);
+          // create empty file
+          // this may not be the right place to do so
+          that.driver.createFile(function (err, id) {
+            newInode.fileId = id;
+            that.superblock.dirtyInode(newInode);
+            callback(err, newInode);
+          });
         });
       });
     });
   });
 };
 
-Crate.prototype.read = function (path, callback) {
+Crate.prototype.open = function (rawPath, callback) {
+  var that = this;
 
+  that.superblock.resolveInode(rawPath, function (err, inode) {
+    if (err) {
+      return callback(err);
+    }
+
+    var file = new Crate.File({
+      id: inode.fileId,
+      system: that
+    });
+
+    callback(null, file);
+  });
 };
 
 Crate.prototype.write = function (rawPath, data, callback) {
