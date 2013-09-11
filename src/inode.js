@@ -10,7 +10,7 @@ var Inode = Crate.Inode = function (options) {
   this.superblock = options.superblock;
   this.dentries = [];
   this.links = 0;
-  this.dirty = true; // ?
+  this.dirty = false; // don't save unless explicit
   this.isDirectory = false;
 
   this.ctime = +new Date();
@@ -28,13 +28,6 @@ var Inode = Crate.Inode = function (options) {
   // parent (dentry?)
   // inodes?
   // dentries
-
-  // create a self link
-  var dentry = new Crate.Dentry({
-    name: '.',
-    id: this.id
-  });
-  this.dentries.push(dentry);
 };
 
 Inode.prototype.serialize = function () {
@@ -54,6 +47,8 @@ Inode.prototype.serialize = function () {
     mode: this.mode,
     version: this.version,
     size: this.size,
+    isDirectory: this.isDirectory,
+    fileId: this.fileId
   };
 
   return data;
@@ -75,10 +70,20 @@ Inode.prototype.lookup = function (name, callback) {
   callback('Could not find child');
 };
 
-// deserialize?
+// attach data to inode
 Inode.prototype.load = function (data) {
-  // attach data to inode
-  console.log('inode load', data);
+  for (var i in data.dentries) {
+    var dentry = new Crate.Dentry({
+      id: data.dentries[i].id,
+      name: data.dentries[i].name
+    });
+    this.dentries.push(dentry);
+  }
+  delete data.dentries;
+
+  for (var i in data) {
+    this[i] = data[i];
+  }
 };
 
 Inode.prototype.link = function (options, callback) {
@@ -158,12 +163,20 @@ Inode.prototype.mkdir = function (dirname, callback) {
       return callback(err);
     }
 
+    // manually create a self link
+    var dentry = new Crate.Dentry({
+      name: '.',
+      id: inode.id
+    });
+    inode.dentries.push(dentry);
+
+    // link parent to child
     that.link({
       name: dirname,
       child: inode
     }, function (err) {
       inode.isDirectory = true;
-      inode.dirty = true;
+      that.superblock.dirtyInode(inode);
 
       callback(err, inode);
     });

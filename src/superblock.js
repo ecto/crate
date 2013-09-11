@@ -14,7 +14,7 @@ var Superblock = Crate.Superblock = function (options, callback) {
   }
 
   var that = this;
-  this.bootstrap(function (err) {
+  that.bootstrap(function (err) {
     callback && callback();
 
     setInterval(function () {
@@ -27,18 +27,32 @@ var Superblock = Crate.Superblock = function (options, callback) {
 Superblock.prototype.bootstrap = function (callback) {
   var that = this;
 
-  that.createInode(function (err, inode) {
-    inode.isDirectory = true;
-    that.dirtyInode(inode);
+  that.loadInode(that.rootNode, function (err) {
+    if (!err) {
+      // root node already exists
+      return callback();
+    }
 
-    // manually create a parent link to itself
-    var dentry = new Crate.Dentry({
-      name: '..',
-      id: inode.id
+    that.createInode(function (err, inode) {
+      inode.isDirectory = true;
+      that.dirtyInode(inode);
+
+      // manually create a self link
+      var dentry = new Crate.Dentry({
+        name: '.',
+        id: inode.id
+      });
+      inode.dentries.push(dentry);
+
+      // manually create a parent link to itself
+      var dentry = new Crate.Dentry({
+        name: '..',
+        id: inode.id
+      });
+      inode.dentries.push(dentry);
+
+      callback();
     });
-    inode.dentries.push(dentry);
-
-    callback();
   });
 };
 
@@ -100,10 +114,8 @@ Superblock.prototype.loadInode = function (id, callback) {
   var that = this;
 
   this.system.driver.readInode(id, function (err, data) {
-    // TODO should we be creating inodes here or erring?
-    if (err || !inode) {
-      that.createInode(callback);
-      return;
+    if (err || !data) {
+      return callback('Inode does not exist');
     }
 
     var inode = new Crate.Inode({

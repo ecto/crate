@@ -5,7 +5,7 @@ var Crate = function Crate (options) {
   options = options || {};
 
   var driver = options.driver || 'memory';
-  this.driver = new Crate.drivers[driver];
+  this.driver = new Crate.drivers[driver](options.options);
 
   this.listeners = {};
   this.cwd = '/';
