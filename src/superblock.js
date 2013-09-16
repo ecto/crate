@@ -152,9 +152,10 @@ Superblock.prototype.updateInode = function (id, callback) {
 Superblock.prototype.deleteInode = function (id, callback) {
   var that = this;
   var inode = this.inodes[id];
-  console.log(inode);
 
   that.system.driver.deleteInode(id, function (err) {
+    delete that.inodes[id];
+
     if (!inode.isDirectory) {
       that.system.driver.deleteFile(inode.fileId, function (err) {
         callback(err);
