@@ -133,9 +133,6 @@ Superblock.prototype.cacheInode = function (inode) {
   this.inodes[inode.id] = inode;
 };
 
-Superblock.prototype.destroyInode = function () {
-};
-
 Superblock.prototype.dirtyInode = function (inode) {
   inode.mtime = +new Date();
   inode.dirty = true;
@@ -152,7 +149,21 @@ Superblock.prototype.updateInode = function (id, callback) {
   });
 };
 
-Superblock.prototype.deleteInode = function () {
+Superblock.prototype.deleteInode = function (id, callback) {
+  var that = this;
+  var inode = this.inodes[id];
+  console.log(inode);
+
+  that.system.driver.deleteInode(id, function (err) {
+    if (!inode.isDirectory) {
+      that.system.driver.deleteFile(inode.fileId, function (err) {
+        callback(err);
+      });
+      return;
+    }
+
+    callback(err);
+  });
 };
 
 Superblock.prototype.write = function () {

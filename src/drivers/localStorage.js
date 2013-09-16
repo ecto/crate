@@ -90,9 +90,10 @@ LocalStorage.prototype.updateInode = function (data, callback) {
   callback(null);
 };
 
-LocalStorage.prototype.destroyInode = function (id, callback) {
+LocalStorage.prototype.deleteInode = function (id, callback) {
   var key = 'inode_' + id;
   this.removeKey(key);
+  callback(null);
 };
 
 /*
@@ -130,9 +131,10 @@ LocalStorage.prototype.updateFile = function (id, data, callback) {
   callback(null);
 };
 
-LocalStorage.prototype.destroyFile = function (id, callback) {
+LocalStorage.prototype.deleteFile = function (id, callback) {
   var key = 'file_' + id;
   this.removeKey(key);
+  callback(null);
 };
 
 })();

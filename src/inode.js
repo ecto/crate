@@ -134,22 +134,31 @@ Inode.prototype.unlink = function (name, callback) {
   var that = this;
 
   // check for existing dentry
-  this.lookup(name, function (err, inode, i) {
-    if (!inode) {
+  this.lookup(name, function (err, child, i) {
+    if (!child) {
       return callback('Link does not exist');
     }
 
     // remove dentry
     that.dentries.splice(i, 1);
     
-    // child links--
-    inode.links--;
+    // mark parent as dirty
+    that.superblock.dirtyInode(that);
+
+    // decrease child link counter
+    child.links--;
+
+    if (child.links == 0) {
+      return that.superblock.deleteInode(child.id, function () {
+        console.log(arguments);
+        callback();
+      });
+    }
+
+    // mark child as dirty
+    that.superblock.dirtyInode(child);
     
     // remove this as parent (..) ?
-
-    // mark both as dirty
-    that.dirty = true;
-    inode.dirty = true;
 
     callback(null);
   });
