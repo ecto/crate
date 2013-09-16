@@ -10,10 +10,56 @@ var fs = new Crate({
 });
 
 $(document).ready(function () {
+  // render the result of an ls() on page log
   displayFiles();
 
+  // when a delete button is clicked
+  $('#files .file .delete').live('click', function (e) {
+    var name = $(this).parent().find('.name').text();
+    var realPath = Crate.util.path.resolve(fs.cwd, name);
+
+    fs.stat(realPath, function (err, info) {
+      if (!info.isDirectory) {
+        // if the delete button is clicked on a file
+        closeFile();
+        deleteFile(name);
+      } else {
+        // if the delete button is clicked on a directory
+        // we need to see if the directory is empty
+        fs.ls(realPath, function (err, list) {
+          var shouldDelete = true;
+          var empty = list.length == 2;
+
+          // list includes . and ..
+          // are there any more files in the directory?
+          if (!empty) {
+            shouldDelete = confirm('Directory not empty. Continue?');
+          }
+
+          // to continue, let's recurse
+          if (shouldDelete) {
+            if (empty) {
+              // just rm
+              deleteDirectory(name);
+              return;
+            }
+
+            // we have to recurse through the child
+            // TODO
+            alert('Not implemented yet. Delete children manually first');
+          }
+        });
+      }
+    });
+  });
+
   $('#files .file').live('click', function (e) {
-    var name = $(this).text();
+    // don't cd() when clicking delete
+    if (e.srcElement.className == 'delete') {
+      return;
+    }
+
+    var name = $(this).find('.name').text();
 
     var realPath = Crate.util.path.resolve(fs.cwd, name);
     fs.stat(realPath, function (err, info) {
@@ -36,8 +82,15 @@ function displayFiles () {
 
     var $files = $('#files');
     $files.html('');
+
     for (var i in items) {
-      var $row = $('<div />').addClass('file').text(items[i]);
+      var $row = $('<div />').addClass('file');
+      $('<span />').addClass('name').text(items[i]).appendTo($row);
+
+      if (items[i] != '.' && items[i] != '..') {
+        $('<button />').addClass('delete').text('delete').appendTo($row);
+      }
+
       $files.append($row);
     }
 
@@ -61,8 +114,15 @@ function createDirectory () {
   });
 }
 
-function deleteFile () {
-  var name = prompt('Filename?');
+function deleteFile (name) {
+  var realPath = Crate.util.path.resolve(fs.cwd, name);
+  fs.rm(realPath, function () {
+    console.log(arguments);
+    displayFiles();
+  });
+}
+
+function deleteDirectory (name) {
   var realPath = Crate.util.path.resolve(fs.cwd, name);
   fs.rm(realPath, function () {
     console.log(arguments);
@@ -97,6 +157,10 @@ function save () {
     }
   });
 }
+
+function closeFile () {
+  $('#file').removeClass('active');
+}
 </script>
 <style>
 body {
@@ -111,16 +175,22 @@ body {
 #files {
   margin-top: 15px;
   border-top: 1px solid #eee;
+  width: 50%;
 }
 
 #files .file {
-  padding: 5px;
+  padding: 10px;
   border-bottom: 1px solid #eee;
 }
 
 #files .file:hover {
   background: #f5f5f5;
   cursor: pointer;
+}
+
+#files .file .delete {
+  float: right;
+  margin-top: -1px;
 }
 
 #file {
@@ -131,11 +201,13 @@ body {
   right: 0;
   bottom: 0;
   width: 0;
-  transition: width 0.1s ease;
+  width: 50%;
+  background: #eee;
 }
 
-#file.active {
-  width: 50%;
+#file button {
+  display: none;
+  margin: 10px 0 0 10px;
 }
 
 #file #data {
@@ -145,23 +217,31 @@ body {
   border: 0;
   border-top: 5px solid #eee;
   position: absolute;
-  top: 50px;
+  top: 35px;
   bottom: 0;
   right: 0;
   left: 0;
+  display: none;
 }
+
+#file.active button {
+  display: inline;
+}
+
+#file.active #data {
+  display: block;
+}
+
 </style>
 </head>
 <body>
   <button onclick="createFile()">create file</button>
   <button onclick="createDirectory()">create directory</button>
-  <br />
-  <button onclick="deleteFile()">delete file</button>
-  <button onclick="deleteDirectory()">delete directory</button>
   <div id="cwd"></div>
   <div id="files"></div>
   <div id="file">
     <button onclick="save()">save</button>
+    <button onclick="closeFile()">close</button>
     <textarea id="data"></textarea>
   </div>
 </body>
