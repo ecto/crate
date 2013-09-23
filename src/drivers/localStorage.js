@@ -62,7 +62,7 @@ LocalStorage.prototype.createInode = function (callback) {
   var key = 'inode_' + id;
 
   if (this.getKey(key)) {
-    callback('Inode already exists');
+    return callback('Inode already exists');
   }
 
   var inode = {};
