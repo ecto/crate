@@ -150,7 +150,6 @@ Inode.prototype.unlink = function (name, callback) {
 
     if (child.links == 0) {
       return that.superblock.deleteInode(child.id, function () {
-        console.log(arguments);
         callback();
       });
     }

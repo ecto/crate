@@ -65,6 +65,10 @@ Crate.prototype.touch = function (rawPath, callback) {
 
       // create new inode
       that.superblock.createInode(function (err, newInode) {
+        if (err) {
+          throw new Error(err);
+        }
+
         // link parent to child
         inode.link({
           name: filename,
@@ -119,7 +123,6 @@ Crate.prototype.write = function (rawPath, data, callback) {
         return callback(err);
       }
 
-console.log('getting file from inode');
       inode.getFile(function () {
 
       });

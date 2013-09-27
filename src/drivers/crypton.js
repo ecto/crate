@@ -7,6 +7,7 @@ var CryptonDriver = Crate.drivers.crypton = function (options) {
   options = options || {};
   this.session = options.session;
   this.prefix = options.prefix || '_crate';
+  this.containers = {};
 
   if (!options.session) {
     throw new Error('Must supply Crypton session to Crate driver');
@@ -23,39 +24,80 @@ CryptonDriver.prototype.load = function (data, callback) {
   callback && callback();
 };
 
-CryptonDriver.prototype.getKey = function (containerName, keyName, callback) {
-  this.session.load(containerName, function (err, container) {
+CryptonDriver.prototype.makeContainerName = function (type, id) {
+  return this.prefix + '_' + type + '_' + id;
+};
+
+CryptonDriver.prototype.loadContainer = function (containerName, callback) {
+  var that = this;
+
+  if (this.containers[containerName]) {
+    return callback(null, this.containers[containerName]);
+  }
+
+  that.session.load(containerName, function (err, container) {
     if (err) {
       return callback(err);
     }
 
-    container.get(keyName, function (err, key) {
-      if (err) {
-        return callback(err);
-      }
-
-      callback(err, key && key.value);
-    });
+    that.containers[containerName] = container;
+    callback(null, container);
   });
 };
 
-CryptonDriver.prototype.setKey = function (containerName, keyName, value, callback) {
+CryptonDriver.prototype.getKey = function (type, id, callback) {
   var that = this;
+  var containerName = this.makeContainerName(type, id);
+  var keyName = 'key';
 
-console.log('setkey', arguments);
-  that.session.create(containerName, function (err) {
-    that.session.load(containerName, function (err, container) {
-      container.add(keyName, function (err) {
-        container.get(keyName, function (err, key) {
-          key.value = value;
+  that.loadContainer(containerName, function (err, container) {
+    if (err) {
+      console.log(err);
+      return callback(err);
+    }
 
-          container.save(function (err) {
-            callback(err);
-          });
-        });
-      });
-    });
+    var value = container.keys[keyName];
+    var clone = value && JSON.parse(JSON.stringify(value));
+    callback(null, clone);
   });
+};
+
+CryptonDriver.prototype.setKey = function (type, id, value, callback) {
+  var that = this;
+  var containerName = this.makeContainerName(type, id);
+  var keyName = 'key';
+
+  that.loadContainer(containerName, function (err, container) {
+    if (err == 'Container does not exist') {
+      return that.session.create(containerName, function (err, container) {
+        if (err) throw err;
+
+        // give the server 1/10th of a second to process
+        // container creation before adding new record
+        setTimeout(function () {
+          set(container);
+        }, 100);
+      });
+    } else if (err) {
+      console.log(err);
+      return callback(err);
+    }
+
+    set(container);
+  });
+
+  function set (container) {
+    var clone = JSON.parse(JSON.stringify(value));
+    container.keys[keyName] = clone;
+
+    container.save(function (err) {
+      if (err) {
+        console.log(err);
+      }
+
+      callback(err);
+    });
+  }
 };
 
 CryptonDriver.prototype.removeKey = function (name) {
@@ -80,7 +122,7 @@ CryptonDriver.prototype.getId = function (callback) {
 
     that.setKey('meta', 'idCounter', id, function (err) {
       if (err) {
-        throw err;
+        console.log(err);
       }
 
       callback(id);
@@ -111,9 +153,7 @@ CryptonDriver.prototype.createInode = function (callback) {
 };
 
 CryptonDriver.prototype.readInode = function (id, callback) {
-console.log('readinode', id);
   this.getKey('inode', id, function (err, key) {
-console.log(arguments);
     if (!key) {
       return callback('Inode not found');
     }
@@ -149,7 +189,9 @@ CryptonDriver.prototype.createFile = function (callback) {
         return callback('File already exists');
       }
 
-      var fileData = new String();
+      var fileData = {
+        value: new String()
+      };
 
       that.setKey('file', id, fileData, function (err) {
         callback(err, id);
@@ -160,16 +202,20 @@ CryptonDriver.prototype.createFile = function (callback) {
 
 CryptonDriver.prototype.readFile = function (id, callback) {
   this.getKey('file', id, function (err, key) {
-    if (typeof key == 'undefined') {
+    if (typeof key.value == 'undefined') {
       return callback('File not found');
     }
 
-    callback(null, key);
+    callback(null, key.value);
   });
 };
 
 CryptonDriver.prototype.updateFile = function (id, data, callback) {
-  this.setKey('file', id, data, function (err) {
+  var fileData = {
+    value: data
+  };
+
+  this.setKey('file', id, fileData, function (err) {
     callback(err);
   });
 };
