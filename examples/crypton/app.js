@@ -8,12 +8,7 @@ function start (session) {
     options: {
       session: session
     }
-  });
-
-  setTimeout(function () {
-    // render the result of an ls() on page log
-    displayFiles();
-  }, 1000);
+  }, displayFiles);
 
   // when a delete button is clicked
   $('#files .file .delete').live('click', function (e) {

@@ -1,7 +1,7 @@
 
 'use strict';
 
-var Crate = function Crate (options) {
+var Crate = function Crate (options, callback) {
   options = options || {};
 
   var driver = options.driver || 'memory';
@@ -12,6 +12,8 @@ var Crate = function Crate (options) {
 
   this.superblock = new Crate.Superblock({
     system: this
+  }, function () {
+    callback();
   });
 };
 
