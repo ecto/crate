@@ -109,7 +109,7 @@ Crate.prototype.open = function (rawPath, callback) {
 Crate.prototype.write = function (rawPath, data, callback) {
   var that = this;
 
-  this.exists(rawPath, function (exists) {
+  that.exists(rawPath, function (exists) {
     if (exists) {
       write();
     } else {
@@ -120,7 +120,7 @@ Crate.prototype.write = function (rawPath, data, callback) {
   });
 
   function write () {
-    this.superblock.resolveInode(rawPath, function (err, inode) {
+    that.superblock.resolveInode(rawPath, function (err, inode) {
       if (err) {
         return callback(err);
       }
