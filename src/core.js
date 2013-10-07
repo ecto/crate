@@ -235,3 +235,44 @@ Crate.prototype.cd = function (rawPath, callback) {
     callback(null, inode);
   });
 };
+
+Crate.prototype.mv = function (from, to, callback) {
+  var that = this;
+  var parentPath = Crate.util.path.dirPath(from);
+  var filename = Crate.util.path.filename(from);
+
+  that.superblock.resolveInode(from, function (err, originalInode) {
+    if (err) {
+      return callback(err);
+    }
+
+    that.superblock.resolveInode(to, function (err, newParentInode) {
+      if (err) {
+        return callback(err);
+      }
+
+      that.superblock.resolveInode(parentPath, function (err, oldParentInode) {
+        if (err) {
+          return callback(err);
+        }
+
+        newParentInode.link({
+          name: filename,
+          child: originalInode
+        }, function (err) {
+          if (err) {
+            return callback(err);
+          }
+
+          oldParentInode.unlink(filename, function (err) {
+            if (err) {
+              return callback(err);
+            }
+
+            callback(null);
+          });
+        });
+      });
+    });
+  });
+};
