@@ -125,6 +125,7 @@ Crate.prototype.write = function (rawPath, data, callback) {
         return callback(err);
       }
 
+      // should just construct File
       inode.getFile(function () {
 
       });
@@ -201,7 +202,9 @@ Crate.prototype.rm = function (rawPath, callback) {
 };
 
 Crate.prototype.stat = function (rawPath, callback) {
-  this.superblock.resolveInode(rawPath, function (err, inode) {
+  var that = this;
+
+  that.superblock.resolveInode(rawPath, function (err, inode) {
     if (err) {
       return callback(err);
     }
@@ -210,15 +213,35 @@ Crate.prototype.stat = function (rawPath, callback) {
       id: inode.id,
       uid: null,
       version: 0,
-      isDirectory: inode.isDirectory
-      // size
-      // atime
-      // mtime
-      // ctime
-      // mode
+      isDirectory: inode.isDirectory,
+      atime: inode.atime,
+      mtime: inode.mtime,
+      ctime: inode.ctime
     };
 
-    callback(null, info);
+    if (inode.isDirectory) {
+      // if this was cached we would be able to give the
+      // size of a directory recursively. this would 
+      // be too expensive on the fly
+      return callback(null, info);
+    }
+
+    // this isn't the right place to do this.
+    // instead, we should cache the size in the
+    // referencing inode whenever writing the file
+    var file = new Crate.File({
+      id: inode.fileId,
+      system: that
+    });
+
+    file.read(function (err, data) {
+      if (err) {
+        return callback(err);
+      }
+
+      info.size = byteCount(data);
+      callback(null, info);
+    });
   });
 };
 
@@ -235,3 +258,8 @@ Crate.prototype.cd = function (rawPath, callback) {
     callback(null, inode);
   });
 };
+
+// http://stackoverflow.com/questions/5515869/string-length-in-bytes-in-javascript
+function byteCount (s) {
+    return encodeURI(s).split(/%..|./).length - 1;
+}
