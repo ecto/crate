@@ -100,11 +100,13 @@ CryptonDriver.prototype.setKey = function (type, id, value, callback) {
   }
 };
 
-CryptonDriver.prototype.removeKey = function (name) {
-  throw 'oops';
-  // delete for now?
-  var key = this.prefix + '_' + name;
-  return localStorage.removeItem(key);
+CryptonDriver.prototype.removeKey = function (type, id, callback) {
+  var that = this;
+  var containerName = this.makeContainerName(type, id);
+
+  that.session.remove(containerName, function (err) {
+    callback(err);
+  });
 };
 
 CryptonDriver.prototype.getId = function (callback) {
