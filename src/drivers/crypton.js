@@ -104,7 +104,7 @@ CryptonDriver.prototype.removeKey = function (type, id, callback) {
   var that = this;
   var containerName = this.makeContainerName(type, id);
 
-  that.session.remove(containerName, function (err) {
+  that.session.deleteContainer(containerName, function (err) {
     callback(err);
   });
 };
