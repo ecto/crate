@@ -52,7 +52,10 @@ CryptonDriver.prototype.getKey = function (type, id, callback) {
 
   that.loadContainer(containerName, function (err, container) {
     if (err) {
-      console.log(err);
+      if (err != 'Container does not exist') {
+        console.log(err);
+      }
+
       return callback(err);
     }
 
