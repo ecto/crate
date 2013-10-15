@@ -9,6 +9,7 @@ var Inode = Crate.Inode = function (options) {
   this.id = options.id;
   this.superblock = options.superblock;
   this.dentries = [];
+  this.custom = {};
   this.links = 0;
   this.dirty = false; // don't save unless explicit
   this.isDirectory = false;
@@ -48,7 +49,8 @@ Inode.prototype.serialize = function () {
     version: this.version,
     size: this.size,
     isDirectory: this.isDirectory,
-    fileId: this.fileId
+    fileId: this.fileId,
+    custom: this.custom
   };
 
   return data;

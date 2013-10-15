@@ -209,15 +209,7 @@ Crate.prototype.stat = function (rawPath, callback) {
       return callback(err);
     }
 
-    var info = {
-      id: inode.id,
-      uid: null,
-      version: 0,
-      isDirectory: inode.isDirectory,
-      atime: inode.atime,
-      mtime: inode.mtime,
-      ctime: inode.ctime
-    };
+    var info = inode.serialize();
 
     if (inode.isDirectory) {
       // if this was cached we would be able to give the
