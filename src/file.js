@@ -6,6 +6,7 @@
 var File = Crate.File = function (options) {
   options = options || {};
   this.id = options.id;
+  this.inode = options.inode;
   this.system = options.system;
 
   // data
@@ -28,7 +29,12 @@ File.prototype.write = function (data, callback) {
 
   that.system.driver.updateFile(that.id, data, function (err) {
     that.data = data;
-    callback(err);
+
+    that.inode.size = byteCount(data);
+    that.inode.mtime = +new Date();
+    that.system.superblock.updateInode(that.inode.id, function () {
+      callback(err);
+    });
   });
 };
 

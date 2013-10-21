@@ -99,6 +99,7 @@ Crate.prototype.open = function (rawPath, callback) {
 
     var file = new Crate.File({
       id: inode.fileId,
+      inode: inode,
       system: that
     });
 
@@ -210,30 +211,7 @@ Crate.prototype.stat = function (rawPath, callback) {
     }
 
     var info = inode.serialize();
-
-    if (inode.isDirectory) {
-      // if this was cached we would be able to give the
-      // size of a directory recursively. this would 
-      // be too expensive on the fly
-      return callback(null, info);
-    }
-
-    // this isn't the right place to do this.
-    // instead, we should cache the size in the
-    // referencing inode whenever writing the file
-    var file = new Crate.File({
-      id: inode.fileId,
-      system: that
-    });
-
-    file.read(function (err, data) {
-      if (err) {
-        return callback(err);
-      }
-
-      info.size = byteCount(data);
-      callback(null, info);
-    });
+    callback(null, info);
   });
 };
 
