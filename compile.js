@@ -40,6 +40,7 @@ compile() {
   echo "Compiling to crate.js..."
   mkdir -p dist
   cat \
+    src/async.js \
     src/core.js \
     src/superblock.js \
     src/inode.js \

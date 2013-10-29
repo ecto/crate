@@ -153,18 +153,40 @@ Superblock.prototype.deleteInode = function (id, callback) {
   var that = this;
   var inode = this.inodes[id];
 
-  that.system.driver.deleteInode(id, function (err) {
-    delete that.inodes[id];
+  if (!inode.isDirectory) {
+    // inode references a file,
+    // delete that file
+    return that.system.driver.deleteFile(inode.fileId, function (err) {
+      callback(err);
+    });
+  } else {
+    // inode references other files,
+    // delete those inodes also.
+    // the cached version of the inode may be stale,
+    // so we grab the latest saved dentries
+    this.system.driver.readInode(id, function (err, data) {
+      async.eachSeries(data.dentries, function (dentry, cb) {
+        if (dentry.name == '.' || dentry.name == '..') {
+          return cb();
+        }
 
-    if (!inode.isDirectory) {
-      that.system.driver.deleteFile(inode.fileId, function (err) {
-        callback(err);
+        inode.unlink(dentry.name, function (err) {
+          cb(err);
+        });
+      }, function (err) {
+        that.system.driver.deleteInode(id, function (err) {
+          callback(err);
+
+          // remove the inode from the cache
+          delete that.inodes[id];
+        });
       });
-      return;
-    }
+    });
+  }
+};
 
-    callback(err);
-  });
+Superblock.prototype.deleteChildren = function (inode, callback) {
+
 };
 
 Superblock.prototype.write = function () {

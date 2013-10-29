@@ -150,7 +150,9 @@ Inode.prototype.unlink = function (name, callback) {
     // decrease child link counter
     child.links--;
 
+    // if there are no remaining referencing inodes
     if (child.links == 0) {
+      // delete child
       return that.superblock.deleteInode(child.id, function () {
         callback();
       });
