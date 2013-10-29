@@ -185,10 +185,6 @@ Superblock.prototype.deleteInode = function (id, callback) {
   }
 };
 
-Superblock.prototype.deleteChildren = function (inode, callback) {
-
-};
-
 Superblock.prototype.write = function () {
 };
 
