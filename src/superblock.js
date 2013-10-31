@@ -158,6 +158,7 @@ Superblock.prototype.deleteInode = function (id, callback) {
     // delete that file
     return that.system.driver.deleteFile(inode.fileId, function (err) {
       callback(err);
+      that.system.emit('deleteFile', inode);
     });
   } else {
     // inode references other files,
@@ -179,6 +180,7 @@ Superblock.prototype.deleteInode = function (id, callback) {
 
           // remove the inode from the cache
           delete that.inodes[id];
+          that.system.emit('deleteDirectory', inode);
         });
       });
     });

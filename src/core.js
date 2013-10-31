@@ -82,6 +82,7 @@ Crate.prototype.touch = function (rawPath, callback) {
             newInode.fileId = id;
             that.superblock.dirtyInode(newInode);
             callback(err, newInode);
+            that.emit('createFile', newInode);
           });
         });
       });
@@ -159,6 +160,7 @@ Crate.prototype.mkdir = function (rawPath, callback) {
 
     inode.mkdir(dirname, function (err, newInode) {
       callback(err, newInode);
+      that.emit('createDirectory', newInode);
     });
   });
 };
